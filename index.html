@@ -7,7 +7,22 @@
   <script src='https://cdnjs.cloudflare.com/ajax/libs/Faker/3.1.0/faker.js'></script>
   <script src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.js'></script>
   <style>
-
+    * {
+      font-family: verdana
+    }
+    .addButton {
+      height: 2rem;
+    }
+    .destroy {
+      margin-top: 1rem;
+      height: 2rem;
+      width: 100%;
+    }
+    /* hr {
+      color: orange;
+      background-color: orange;
+      height: 0.1rem;
+    } */
   </style>
 </head>
 <body>
@@ -15,8 +30,8 @@
   <script type='text/babel'>
     const { Component } = React;
     const { render } = ReactDOM;
-
     const API = 'https://acme-users-api-rev.herokuapp.com/api';
+
     const fetchUser = async ()=> {
       const storage = window.localStorage;
       const userId = storage.getItem('userId'); 
@@ -31,33 +46,52 @@
       }
       const user = (await axios.get(`${API}/users/random`)).data;
       storage.setItem('userId', user.id);
-      return  user;
+      return user;
     };
-
-    const Notes = () => {
+    // users/:id/notes
+    // await axios.get(`${API}/users/${user.id}/notes`)
+    const Notes = ({ notes, followingCompanies, vacations, user }) => {
+      notes.map( note => console.log(note))
       return (
       <div>
-        <button>Add A Random Note</button>
+        <h1>Notes ({ notes.length })</h1>
+        <button className='addButton'>Add A Random Note</button>
+        < br />
+        { //note.userId === user.id
+          notes.map( note => <div key={note.id}>{note.text}</div>)
+        }
         <button className='destroy'>Destroy</button>
         < hr />
       </div>
       )
     }
-
-    const FollowingCompanies = () => {
+    // users/:id/followingCompanies
+    // await axios.get(`${API}/users/${user.id}/followingCompanies`)
+    const FollowingCompanies = ({ notes, followingCompanies, vacations, user }) => {
       return (
       <div>
-        <button>Add A Random Following Company</button>
+        <h1>Following Companies </h1>
+        <button className='addButton'>Add A Random Following Company</button>
+        < br />
+        { 
+
+        }
         <button className='destroy'>Destroy</button>
         < hr />
       </div>
       )
     }
-
-    const Vacations = () => {
+    // users/:id/vacations
+    // await axios.get(`${API}/users/${user.id}/vacations`)
+    const Vacations = ({ notes, followingCompanies, vacations, user }) => {
       return (
       <div>
-        <button>Add a Random Vacation</button> 
+        <h1>Vacations </h1>
+        <button className='addButton'>Add a Random Vacation</button> 
+        < br />
+        {
+          
+        }
         <button className='destroy'>Destroy</button>
         < hr />
       </div>
@@ -78,16 +112,18 @@
       }
       async componentDidMount() {
         const user = await fetchUser();
-        this.setState({ user });
+        const notes = (await axios.get(`${API}/users/${user.id}/notes`)).data;
+        this.setState({ user, notes });
       }
       render() {
-        const { error, user, companes, vacations, followingCompanies, notes } = this.state;
+        const { error, user, companies, vacations, followingCompanies, notes } = this.state;
+        // console.log(user)
         return (
           <div>
             <h1>The Acme Random Life</h1>
             Welcome { user.fullName } to your Random Life!
             <div className='error'> { error } </div>
-            <Notes />
+            <Notes notes = { notes } user = { user } />
             <FollowingCompanies />
             <Vacations />
           </div>
