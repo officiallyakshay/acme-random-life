@@ -68,7 +68,7 @@
     }
     // users/:id/followingCompanies
     // await axios.get(`${API}/users/${user.id}/followingCompanies`)
-    const FollowingCompanies = ({ companies }) => {
+    const FollowingCompanies = ({ companies, followingCompanies }) => {
       console.log(companies)
       return (
       <div>
@@ -76,7 +76,19 @@
         <button className='addButton'>Add A Random Following Company</button>
         < br />
         { 
-          <div>{companies.name}</div>
+          companies.name
+          // companies.map( company => {
+          //   followingCompanies.filter( followComp => {
+          //     if (followComp.companyId === company.id) {
+          //       <div>{company.name}</div>
+          //     } else {
+          //       <div>hi</div>
+          //     }
+          //     console.log(company)
+          //     console.log('--')
+          //     console.log(followComp)
+          //   })
+          // })
         }
         <button className='destroy'>Destroy</button>
         < hr />
@@ -85,7 +97,8 @@
     }
     // users/:id/vacations
     // await axios.get(`${API}/users/${user.id}/vacations`)
-    const Vacations = ({ notes, followingCompanies, vacations, user }) => {
+    const Vacations = ({ vacations }) => {
+      console.log(vacations)
       return (
       <div>
         <h1>Vacations </h1>
@@ -129,7 +142,7 @@
             Welcome { user.fullName } to your Random Life!
             <div className='error'> { error } </div>
             <Notes notes = { notes } />
-            <FollowingCompanies companies = { companies } />
+            <FollowingCompanies followingCompanies = { followingCompanies } companies = { companies } />
             <Vacations />
           </div>
         )
