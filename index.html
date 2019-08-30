@@ -68,27 +68,25 @@
     }
     // users/:id/followingCompanies
     // await axios.get(`${API}/users/${user.id}/followingCompanies`)
-    const FollowingCompanies = ({ companies, followingCompanies }) => {
-      console.log(companies)
+    const FollowingCompanies = ({ companies, followingCompanies, user }) => {
+      // console.log(companies)
+      let filteredComp = companies.filter( company => followingCompanies.find( followComp => company.id === followComp.companyId))
+      console.log(filteredComp)
       return (
       <div>
         <h1>Following Companies ({ companies.length })</h1>
         <button className='addButton'>Add A Random Following Company</button>
         < br />
         { 
-          companies.name
-          // companies.map( company => {
-          //   followingCompanies.filter( followComp => {
-          //     if (followComp.companyId === company.id) {
-          //       <div>{company.name}</div>
-          //     } else {
-          //       <div>hi</div>
-          //     }
-          //     console.log(company)
-          //     console.log('--')
-          //     console.log(followComp)
-          //   })
-          // })
+          filteredComp.map(filComp => <div key={filComp.id}>{filComp.name}</div>)
+          // console.log(followingCompanies)
+          // console.log(companies)
+          // companies.filter(company => console.log(company.id))
+          // followingCompanies.map(followComp => console.log(followComp))
+          
+                // return <div>company.name</div>
+          //   )
+          // )
         }
         <button className='destroy'>Destroy</button>
         < hr />
@@ -129,20 +127,20 @@
         const user = await fetchUser();
         const notes = (await axios.get(`${API}/users/${user.id}/notes`)).data;
         const followingCompanies = (await axios.get(`${API}/users/${user.id}/followingCompanies`)).data;
-        const companies = (await axios.get(`${API}/companies/random`)).data;
+        const companies = (await axios.get(`${API}/companies`)).data;
         const vacations = (await axios.get(`${API}/users/${user.id}/vacations`)).data;
         this.setState({ user, notes, followingCompanies, vacations, companies });
       }
       render() {
         const { error, user, companies, vacations, followingCompanies, notes } = this.state;
-        // console.log(user)
+        console.log(user)
         return (
           <div>
             <h1>The Acme Random Life</h1>
             Welcome { user.fullName } to your Random Life!
             <div className='error'> { error } </div>
             <Notes notes = { notes } />
-            <FollowingCompanies followingCompanies = { followingCompanies } companies = { companies } />
+            <FollowingCompanies user = { user } followingCompanies = { followingCompanies } companies = { companies } />
             <Vacations />
           </div>
         )
