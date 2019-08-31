@@ -92,7 +92,7 @@
     }
     // users/:id/vacations
     // await axios.post(`${API}/users/${user.id}/vacations`)
-    const Vacations = ({ vacations, error }) => {
+    const Vacations = ({ vacations, vacation, error }) => {
       // console.log(vacations)
       if (vacations.length === 3) {
         error = 'user already has 3 vacations';
@@ -101,7 +101,7 @@
       return (
       <div>
         <h1>Vacations ({vacations.length})</h1>
-        <button className='addButton'>Add a Random Vacation</button> 
+        <button className='addButton' >Add a Random Vacation</button> 
         < br />
         {
           <div>{moment(vacations.startDate).format('MM/DD/YYYY')} to {moment(vacations.endDate).format('MM/DD/YYYY')}</div>
@@ -126,19 +126,30 @@
       }
       async componentDidMount() {
         const user = await fetchUser();
+
         const notes = (await axios.get(`${API}/users/${user.id}/notes`)).data;
+        if (notes.length === 5) {
+          await axios.delete(`${API}/users/${user.id}/notes/${notes[0].id}`);
+        }
+        const note = (await axios.post(`${API}/users/${user.id}/notes`, { text: `lorem ipsum` } )).data;
+        console.log(note);
+
         const followingCompanies = (await axios.get(`${API}/users/${user.id}/followingCompanies`)).data;
         const companies = (await axios.get(`${API}/companies`)).data;
+        
+
         let vacations = (await axios.get(`${API}/users/${user.id}/vacations`)).data;
         if (vacations.length === 3) {
           await axios.delete(`${API}/users/${user.id}/vacations/${vacations[0].id}`);
         }
         const vacation = (await axios.post(`${API}/users/${user.id}/vacations`, { startDate: `10/31/2019`, endDate: '11/1/2019' } )).data;
+        console.log(vacation);
+
         this.setState({ user, notes, followingCompanies, vacations, companies });
       }
       render() {
         const { error, user, companies, vacations, followingCompanies, notes } = this.state;
-        console.log(user)
+        // console.log(user)
         return (
           <div>
             <h1>The Acme Random Life</h1>
