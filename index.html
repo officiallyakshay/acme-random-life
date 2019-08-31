@@ -127,12 +127,14 @@
       async componentDidMount() {
         const user = await fetchUser();
 
-        const notes = (await axios.get(`${API}/users/${user.id}/notes`)).data;
+        let notes = (await axios.get(`${API}/users/${user.id}/notes`)).data;
         if (notes.length === 5) {
           await axios.delete(`${API}/users/${user.id}/notes/${notes[0].id}`);
         }
         const note = (await axios.post(`${API}/users/${user.id}/notes`, { text: `lorem ipsum` } )).data;
-        console.log(note);
+        // console.log(note);
+        await axios.put(`${API}/users/${user.id}/notes/${note.id}`, { text: `${note.text} Updated!!` } )
+        notes = (await axios.get(`${API}/users/${user.id}/notes`)).data
 
         const followingCompanies = (await axios.get(`${API}/users/${user.id}/followingCompanies`)).data;
         const companies = (await axios.get(`${API}/companies`)).data;
@@ -154,7 +156,7 @@
           <div>
             <h1>The Acme Random Life</h1>
             Welcome { user.fullName } to your Random Life!
-            <div>write error here if exceeds limit</div>
+            <div>{ error }</div>
             <div className='error'> { error } </div>
             <Notes notes = { notes } error = { error } />
             <FollowingCompanies user = { user } followingCompanies = { followingCompanies } companies = { companies } error = { error } />
