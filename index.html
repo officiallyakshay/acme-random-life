@@ -51,15 +51,11 @@
     };
     // users/:id/notes
     // await axios.get(`${API}/users/${user.id}/notes`)
-    // const NotesError = async ({ notes, error }) => {
-    //   if (notes.length === 5) {
-    //     await axios.delete(`${API}/users/${user.id}/notes`);
-    //     error = 'user can only have a max of 5 notes';
-    //     return error;
-    //   }
-    // }
-
     const Notes = ({ notes, error }) => {
+      if ( notes.length === 5 ) {
+        error = 'user can only have a max of 5 notes';
+        // return error;
+      }
       return (
       <div>
         <h1>Notes ({ notes.length })</h1>
@@ -79,7 +75,7 @@
       let filteredComp = companies.filter( company => followingCompanies.find( followComp => company.id === followComp.companyId))
       if ( filteredComp.length === 5 ) {
         error = 'user is already following 5 companies';
-        return error;
+        // return error;
       }
       return (
       <div>
@@ -97,15 +93,14 @@
     // users/:id/vacations
     // await axios.post(`${API}/users/${user.id}/vacations`)
     const Vacations = ({ vacations, error }) => {
-      console.log(vacations)
+      // console.log(vacations)
       if (vacations.length === 3) {
-        // await axios.delete(`${API}/users/${user.id}/${vacations[0]}`)
         error = 'user already has 3 vacations';
-        return error;
+        // return error;
       }
       return (
       <div>
-        <h1>Vacations </h1>
+        <h1>Vacations ({vacations.length})</h1>
         <button className='addButton'>Add a Random Vacation</button> 
         < br />
         {
@@ -134,7 +129,11 @@
         const notes = (await axios.get(`${API}/users/${user.id}/notes`)).data;
         const followingCompanies = (await axios.get(`${API}/users/${user.id}/followingCompanies`)).data;
         const companies = (await axios.get(`${API}/companies`)).data;
-        const vacations = (await axios.post(`${API}/users/${user.id}/vacations`, { startDate: `10/31/2019`, endDate: '11/1/2019'} )).data;
+        let vacations = (await axios.get(`${API}/users/${user.id}/vacations`)).data;
+        if (vacations.length === 3) {
+          await axios.delete(`${API}/users/${user.id}/vacations/${vacations[0].id}`);
+        }
+        const vacation = (await axios.post(`${API}/users/${user.id}/vacations`, { startDate: `10/31/2019`, endDate: '11/1/2019' } )).data;
         this.setState({ user, notes, followingCompanies, vacations, companies });
       }
       render() {
@@ -144,6 +143,7 @@
           <div>
             <h1>The Acme Random Life</h1>
             Welcome { user.fullName } to your Random Life!
+            <div>write error here if exceeds limit</div>
             <div className='error'> { error } </div>
             <Notes notes = { notes } error = { error } />
             <FollowingCompanies user = { user } followingCompanies = { followingCompanies } companies = { companies } error = { error } />
