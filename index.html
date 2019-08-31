@@ -73,6 +73,7 @@
     // await axios.get(`${API}/users/${user.id}/followingCompanies`)
     const FollowingCompanies = ({ companies, followingCompanies, user, error }) => {
       let filteredComp = companies.filter( company => followingCompanies.find( followComp => company.id === followComp.companyId))
+      // console.log(filteredComp)
       if ( filteredComp.length === 5 ) {
         error = 'user is already following 5 companies';
         // return error;
@@ -92,7 +93,7 @@
     }
     // users/:id/vacations
     // await axios.post(`${API}/users/${user.id}/vacations`)
-    const Vacations = ({ vacations, vacation, error }) => {
+    const Vacations = ({ vacations, error }) => {
       // console.log(vacations)
       if (vacations.length === 3) {
         error = 'user already has 3 vacations';
@@ -101,10 +102,10 @@
       return (
       <div>
         <h1>Vacations ({vacations.length})</h1>
-        <button className='addButton' >Add a Random Vacation</button> 
+        <button className='addButton' onClick = { () => vacations.map( vacation => <div key={vacation.id}>{moment(vacation.startDate).format('MM/DD/YYYY')} to {moment(vacation.endDate).format('MM/DD/YYYY')}</div>) } >Add a Random Vacation</button> 
         < br />
         {
-          <div>{moment(vacations.startDate).format('MM/DD/YYYY')} to {moment(vacations.endDate).format('MM/DD/YYYY')}</div>
+          vacations.map( vacation => <div key={vacation.id}>{moment(vacation.startDate).format('MM/DD/YYYY')} to {moment(vacation.endDate).format('MM/DD/YYYY')}</div>)
         }
         <button className='destroy'>Destroy</button>
         < hr />
@@ -124,29 +125,36 @@
           error: ''
         }
       }
-      async componentDidMount() {
-        const user = await fetchUser();
-
-        let notes = (await axios.get(`${API}/users/${user.id}/notes`)).data;
+      async add({ notes, followingCompanies, vacations }) {
+        const note = (await axios.post(`${API}/users/${user.id}/notes`, { text: `lorem ipsum` } )).data;
+        // const followComp = (await axios.post(`${API}/users/${user.id}/followingCompanies`, { rating: 3. companyId: "b7bc5996-9e75-4fed-9f1c-d6204b1fb492" } )).data;
+        const vacation = (await axios.post(`${API}/users/${user.id}/vacations`, { startDate: `10/31/2019`, endDate: '11/1/2019' } )).data;        
+      }
+      async update({ notes, followingCompanies, vacations }) {
+        await axios.put(`${API}/users/${user.id}/notes/${note.id}`, { text: `${note.text} Updated` } );
+        notes = (await axios.get(`${API}/users/${user.id}/notes`)).data
+        
+        await axios.put(`${API}/users/${user.id}/vacations/${vacation.id}`, { startDate: `09/10/2019`, endDate: `10/10/2019` } )
+        vacations = (await axios.get(`${API}/users/${user.id}/vacations`)).data;
+      
+      }
+      async delete({ notes, followingCompanies, vacations }) {
         if (notes.length === 5) {
           await axios.delete(`${API}/users/${user.id}/notes/${notes[0].id}`);
         }
-        const note = (await axios.post(`${API}/users/${user.id}/notes`, { text: `lorem ipsum` } )).data;
-        // console.log(note);
-        await axios.put(`${API}/users/${user.id}/notes/${note.id}`, { text: `${note.text} Updated!!` } )
-        notes = (await axios.get(`${API}/users/${user.id}/notes`)).data
-
-        const followingCompanies = (await axios.get(`${API}/users/${user.id}/followingCompanies`)).data;
-        const companies = (await axios.get(`${API}/companies`)).data;
-        
-
-        let vacations = (await axios.get(`${API}/users/${user.id}/vacations`)).data;
+        // if (followingCompanies.length === 5) {
+        //   await axios.delete(`${API}/users/${user.id}/followingCompanies/${followingCompanies[0].id}`);  
+        // }
         if (vacations.length === 3) {
           await axios.delete(`${API}/users/${user.id}/vacations/${vacations[0].id}`);
         }
-        const vacation = (await axios.post(`${API}/users/${user.id}/vacations`, { startDate: `10/31/2019`, endDate: '11/1/2019' } )).data;
-        console.log(vacation);
-
+      }
+      async componentDidMount() {
+        const user = await fetchUser();
+        let notes = (await axios.get(`${API}/users/${user.id}/notes`)).data;
+        let followingCompanies = (await axios.get(`${API}/users/${user.id}/followingCompanies`)).data;
+        const companies = (await axios.get(`${API}/companies`)).data;
+        let vacations = (await axios.get(`${API}/users/${user.id}/vacations`)).data;
         this.setState({ user, notes, followingCompanies, vacations, companies });
       }
       render() {
@@ -156,7 +164,6 @@
           <div>
             <h1>The Acme Random Life</h1>
             Welcome { user.fullName } to your Random Life!
-            <div>{ error }</div>
             <div className='error'> { error } </div>
             <Notes notes = { notes } error = { error } />
             <FollowingCompanies user = { user } followingCompanies = { followingCompanies } companies = { companies } error = { error } />
