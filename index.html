@@ -59,9 +59,9 @@
       return (
       <div>
         <h1>Notes ({ notes.length })</h1>
-        <button className='addButton'>Add A Random Note</button>
+        <button className='addButton' onClick = { () => notes.map( note => <div key={note.id}>{note.text}</div>) } >Add A Random Note</button>
         < br />
-        { 
+        {  
           notes.map( note => <div key={note.id}>{note.text}</div>)
         }
         <button className='destroy'>Destroy</button>
@@ -124,13 +124,14 @@
           followingCompanies: [],
           error: ''
         }
+        // this.add = this.add.bind(this);
       }
-      async add({ notes, followingCompanies, vacations }) {
+      add = async ({ notes, followingCompanies, vacations }) => {
         const note = (await axios.post(`${API}/users/${user.id}/notes`, { text: `lorem ipsum` } )).data;
         // const followComp = (await axios.post(`${API}/users/${user.id}/followingCompanies`, { rating: 3. companyId: "b7bc5996-9e75-4fed-9f1c-d6204b1fb492" } )).data;
         const vacation = (await axios.post(`${API}/users/${user.id}/vacations`, { startDate: `10/31/2019`, endDate: '11/1/2019' } )).data;        
       }
-      async update({ notes, followingCompanies, vacations }) {
+      update = async ({ notes, followingCompanies, vacations }) => {
         await axios.put(`${API}/users/${user.id}/notes/${note.id}`, { text: `${note.text} Updated` } );
         notes = (await axios.get(`${API}/users/${user.id}/notes`)).data
         
@@ -138,7 +139,7 @@
         vacations = (await axios.get(`${API}/users/${user.id}/vacations`)).data;
       
       }
-      async delete({ notes, followingCompanies, vacations }) {
+      _delete = async ({ notes, followingCompanies, vacations }) => {
         if (notes.length === 5) {
           await axios.delete(`${API}/users/${user.id}/notes/${notes[0].id}`);
         }
@@ -158,16 +159,16 @@
         this.setState({ user, notes, followingCompanies, vacations, companies });
       }
       render() {
-        const { error, user, companies, vacations, followingCompanies, notes } = this.state;
+        const { error, user, companies, vacations, followingCompanies, notes, add, update, _delete } = this.state;
         // console.log(user)
         return (
           <div>
             <h1>The Acme Random Life</h1>
             Welcome { user.fullName } to your Random Life!
             <div className='error'> { error } </div>
-            <Notes notes = { notes } error = { error } />
-            <FollowingCompanies user = { user } followingCompanies = { followingCompanies } companies = { companies } error = { error } />
-            <Vacations vacations = { vacations } error = { error } />
+            <Notes notes = { notes } error = { error } add = { add } update = { update } _delete = { _delete } />
+            <FollowingCompanies user = { user } followingCompanies = { followingCompanies } companies = { companies } error = { error } add = { add } update = { update } _delete = { _delete } />
+            <Vacations vacations = { vacations } error = { error } add = { add } update = { update } _delete = { _delete } />
           </div>
         )
       }
