@@ -51,7 +51,7 @@
     };
     // users/:id/notes
     // await axios.get(`${API}/users/${user.id}/notes`)
-    const Notes = ({ notes, error, add, update, _delete }) => {
+    const Notes = ({ notes, error, addNote, update, _delete }) => {
       if ( notes.length === 5 ) {
         error = 'user can only have a max of 5 notes';
         // return error;
@@ -59,7 +59,7 @@
       return (
       <div>
         <h1>Notes ({ notes.length })</h1>
-        <button className='addButton' onClick = { () => add() } >Add A Random Note</button>
+        <button className='addButton' onClick = { () => addNote() } >Add A Random Note</button>
         < br />
         {  
           notes.map( note => {
@@ -76,26 +76,35 @@
     }
     // users/:id/followingCompanies
     // await axios.get(`${API}/users/${user.id}/followingCompanies`)
-    const FollowingCompanies = ({ companies, followingCompanies, user, error, add, update, _delete }) => {
+    const FollowingCompanies = ({ companies, followingCompanies, user, error, addCompany, update, _delete }) => {
       let filteredComp = companies.filter( company => followingCompanies.find( followComp => company.id === followComp.companyId))
       // console.log(filteredComp)
       if ( filteredComp.length === 5 ) {
         error = 'user is already following 5 companies';
         // return error;
       }
+      let index = Math.floor(Math.random() * companies.length)//between 1 and 60
       return (
       <div>
         <h1>Following Companies ({ filteredComp.length })</h1>
-        <button className='addButton' onClick = { () => add() } >Add A Random Following Company</button>
+        <button className='addButton' onClick = { () => addCompany(companies[index]) } >Add A Random Following Company</button>
         < br />
         { 
-          filteredComp.map(filComp => {
-            return (
-            <div key={filComp.id}>
-            {filComp.name}
-            <button className='destroy' onClick = { () => _delete(filComp.id) } >Destroy</button>
-            </div>
-          )})
+          followingCompanies.map(filComp => {
+                const company = companies.find(company => filComp.companyId === company.id)
+                name = company.name
+              return (
+                <div key={filComp.id}>
+                  {name}
+                  <button
+                    className="destroy"
+                    onClick={() => _delete(filComp.id, "companies")}
+                  >
+                    Destroy
+                  </button>
+                </div>
+              )
+            })
         }
         < hr />
       </div>
@@ -103,7 +112,7 @@
     }
     // users/:id/vacations
     // await axios.post(`${API}/users/${user.id}/vacations`)
-    const Vacations = ({ vacations, error, add, update,  _delete }) => {
+    const Vacations = ({ vacations, error, addVacation, update,  _delete }) => {
       // console.log(vacations)
       if (vacations.length === 3) {
         error = 'user already has 3 vacations';
@@ -112,18 +121,16 @@
       return (
       <div>
         <h1>Vacations ({vacations.length})</h1>
-        <button className='addButton' onClick = { () => add() } >Add a Random Vacation</button> 
+        <button className='addButton' onClick = { () => addVacation() } >Add a Random Vacation</button> 
         < br />
         {
-          // this.setState({ vacation: onClick() })
-          // <div>{this.state.vacation}</div>
           vacations.map( vacation => {
             return (
               <div key = { vacation.id }>
               {moment(vacation.startDate).format('MM/DD/YYYY')} to {moment(vacation.endDate).format('MM/DD/YYYY')}
               <button className='destroy' onClick = { () => _delete(vacation.id) }>Destroy</button>
               </div>
-            )})
+          )})
         }
         < hr />
       </div>
@@ -142,36 +149,31 @@
           error: ''
         }
       }
-      add = async (route, id) => {
-        // if ( route === 'notes') {
-          const note = (await axios.post(`${API}/users/${this.state.user.id}/notes`, { text: `lorem ipsum` } )).data;
-          console.log(note)
-          const notes = [...this.state.notes, note];
-          this.setState({ notes });
+      addNote = async (id) => {
+        const note = (await axios.post(`${API}/users/${this.state.user.id}/notes`, { text: `lorem ipsum` } )).data;
+        const notes = [...this.state.notes, note];
+        // if (notes.length === 5) {
+        //   error = ''
         // }
-
-        const filComp = (await axios.post(`${API}/users/${this.state.user.id}/followingCompanies`, { rating: 3, companyId: `${filComp.id}` } )).data;
-        console.log(filComp)
-        const companies = [...this.state.companies, filComp];
-        this.setState({ companies }); 
-        
+        this.setState({ notes });
+      }
+      addCompany = async (company) => {
+        company = (await axios.post(`${API}/users/${this.state.user.id}/followingCompanies`, {rating: 3, companyId: company.id})).data
+        const followingCompanies = [...this.state.followingCompanies, company];
+        this.setState({ followingCompanies });
+      }
+      addVacation = async(id) => {
         const vacation = (await axios.post(`${API}/users/${this.state.user.id}/vacations`, { startDate: moment('09/10/2019').format('MM/DD/YYYY'), endDate: moment('10/10/2019').format('MM/DD/YYYY') } )).data;
-        console.log(vacation)
         const vacations = [...this.state.vacations, vacation];
         this.setState({ vacations });
-        
       }
       update = async (id) => {
         await axios.put(`${API}/users/${user.id}/notes/${notes.id}`, { text: `${note.text} Updated` } );
         await axios.put(`${API}/users/${user.id}/followingCompanies/${followingCompanies.id}`, { rating: 3, companyId: `${filComp.id}` } );
         await axios.put(`${API}/users/${user.id}/vacations/${vacation.id}`, { startDate: `09/10/2019`, endDate: `10/10/2019` } )
-        // vacations = (await axios.get(`${API}/users/${user.id}/vacations`)).data;
-      
       }
       _delete = async (id) => {
-        // if (notes.length === 5) {
           await axios.delete(`${API}/users/${this.state.user.id}/notes/${id}`);
-        // }
         // if (followingCompanies.length === 5) {
           await axios.delete(`${API}/users/${this.state.user.id}/followingCompanies/${id}`);  
         // }
@@ -193,16 +195,16 @@
         this.setState({ user, notes, followingCompanies, vacations, companies });
       }
       render() {
-        const { error, user, companies, vacations, followingCompanies, notes, add, update, _delete } = this.state;
+        const { error, user, companies, vacations, followingCompanies, notes, addNote, addVacation, addCompany, update, _delete } = this.state;
         // console.log( vacations )
         return (
           <div>
             <h1>The Acme Random Life</h1>
             Welcome { user.fullName } to your Random Life!
             <div className='error'> { error } </div>
-            <Notes notes = { notes } error = { error } add = { this.add } update = { this.update } _delete = { this._delete } />
-            <FollowingCompanies user = { user } followingCompanies = { followingCompanies } companies = { companies } error = { error } add = { this.add } update = { this.update } _delete = { this._delete } />
-            <Vacations vacations = { vacations } error = { error } add = { this.add } update = { this.update } _delete = { this._delete } />
+            <Notes notes = { notes } error = { error } addNote = { this.addNote } update = { this.update } _delete = { this._delete } />
+            <FollowingCompanies user = { user } followingCompanies = { followingCompanies } companies = { companies } error = { error } addCompany = { this.addCompany } update = { this.update } _delete = { this._delete } />
+            <Vacations vacations = { vacations } error = { error } addVacation = { this.addVacation } update = { this.update } _delete = { this._delete } />
           </div>
         )
       }
