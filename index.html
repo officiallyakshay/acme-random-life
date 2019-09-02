@@ -19,6 +19,9 @@
       height: 2rem;
       width: 100%;
     }
+    .error {
+      color: red;
+    }
     /* hr {
       color: orange;
       background-color: orange;
@@ -49,12 +52,9 @@
       storage.setItem('userId', user.id);
       return user;
     };
-    // users/:id/notes
-    // await axios.get(`${API}/users/${user.id}/notes`)
     const Notes = ({ notes, error, addNote, update, _delete }) => {
-      if ( notes.length === 5 ) {
+      if ( notes.length > 5 ) {
         error = 'user can only have a max of 5 notes';
-        // return error;
       }
       return (
       <div>
@@ -74,14 +74,10 @@
       </div>
       )
     }
-    // users/:id/followingCompanies
-    // await axios.get(`${API}/users/${user.id}/followingCompanies`)
     const FollowingCompanies = ({ companies, followingCompanies, user, error, addCompany, update, _delete }) => {
       let filteredComp = companies.filter( company => followingCompanies.find( followComp => company.id === followComp.companyId))
-      // console.log(filteredComp)
-      if ( filteredComp.length === 5 ) {
+      if ( filteredComp.length > 5 ) {
         error = 'user is already following 5 companies';
-        // return error;
       }
       let index = Math.floor(Math.random() * companies.length)//between 1 and 60
       return (
@@ -91,17 +87,11 @@
         < br />
         { 
           followingCompanies.map(filComp => {
-                const company = companies.find(company => filComp.companyId === company.id)
-                name = company.name
+            const company = companies.find(company => filComp.companyId === company.id)
               return (
                 <div key={filComp.id}>
-                  {name}
-                  <button
-                    className="destroy"
-                    onClick={() => _delete(filComp.id, "companies")}
-                  >
-                    Destroy
-                  </button>
+                  {company.name}
+                  <button className="destroy" onClick={() => _delete(filComp.id, "companies")}> Destroy </button>
                 </div>
               )
             })
@@ -110,13 +100,9 @@
       </div>
       )
     }
-    // users/:id/vacations
-    // await axios.post(`${API}/users/${user.id}/vacations`)
     const Vacations = ({ vacations, error, addVacation, update,  _delete }) => {
-      // console.log(vacations)
-      if (vacations.length === 3) {
+      if (vacations.length > 3) {
         error = 'user already has 3 vacations';
-        // return error;
       }
       return (
       <div>
@@ -149,12 +135,18 @@
           error: ''
         }
       }
-      addNote = async (id) => {
-        const note = (await axios.post(`${API}/users/${this.state.user.id}/notes`, { text: `lorem ipsum` } )).data;
+      addNote = async ( id, text, error ) => {
+        text = [
+          'Lorem ipsum dolor sit amet',
+          'consectetur adipiscing elit',
+          'In sit amet purus lectus',
+          'Sed in dui sagittis, convallis odio non',
+          'Aenean eleifend iaculis',
+          'Maecenas congue erat', 
+          'rutrum turpis elementum'
+        ] 
+        const note = (await axios.post(`${API}/users/${this.state.user.id}/notes`, { text: `${text[Math.round(Math.random())]}` } )).data;
         const notes = [...this.state.notes, note];
-        // if (notes.length === 5) {
-        //   error = ''
-        // }
         this.setState({ notes });
       }
       addCompany = async (company) => {
@@ -163,27 +155,34 @@
         this.setState({ followingCompanies });
       }
       addVacation = async(id) => {
-        const vacation = (await axios.post(`${API}/users/${this.state.user.id}/vacations`, { startDate: moment('09/10/2019').format('MM/DD/YYYY'), endDate: moment('10/10/2019').format('MM/DD/YYYY') } )).data;
+        const vacayStart = [
+          '08/25/2019',
+          '09/10/2019',
+          '09/30/2019',
+          '10/31/2019'
+        ];
+        const vacayEnd = [
+          '11/1/2019',
+          '12/25/2019', 
+          '01/01/2020',
+          '02/14/2020'
+        ]
+        const vacation = (await axios.post(`${API}/users/${this.state.user.id}/vacations`, { startDate: moment(vacayStart[Math.round(Math.random())]), endDate: moment(vacayEnd[Math.round(Math.random())]) } )).data;
         const vacations = [...this.state.vacations, vacation];
         this.setState({ vacations });
       }
       update = async (id) => {
-        await axios.put(`${API}/users/${user.id}/notes/${notes.id}`, { text: `${note.text} Updated` } );
+        await axios.put(`${API}/users/${user.id}/notes/${notes.id}`, { text: `${text}` } );
         await axios.put(`${API}/users/${user.id}/followingCompanies/${followingCompanies.id}`, { rating: 3, companyId: `${filComp.id}` } );
         await axios.put(`${API}/users/${user.id}/vacations/${vacation.id}`, { startDate: `09/10/2019`, endDate: `10/10/2019` } )
       }
       _delete = async (id) => {
           await axios.delete(`${API}/users/${this.state.user.id}/notes/${id}`);
-        // if (followingCompanies.length === 5) {
           await axios.delete(`${API}/users/${this.state.user.id}/followingCompanies/${id}`);  
-        // }
-        // if (vacations.length === 3) {
           await axios.delete(`${API}/users/${this.state.user.id}/vacations/${id}`);
-        // }
           const notes = this.state.notes.filter( note => note.id !== id );
           const followingCompanies = this.state.followingCompanies.filter( followComp => followComp.id !== id );
           const vacations = this.state.vacations.filter( vacation => vacation.id !== id );
-          // const notes = this.state.notes.filter( note => note.id !== id )
           this.setState({ notes, followingCompanies, vacations });
       }
       async componentDidMount() {
@@ -196,15 +195,14 @@
       }
       render() {
         const { error, user, companies, vacations, followingCompanies, notes, addNote, addVacation, addCompany, update, _delete } = this.state;
-        // console.log( vacations )
         return (
           <div>
             <h1>The Acme Random Life</h1>
             Welcome { user.fullName } to your Random Life!
-            <div className='error'> { error } </div>
-            <Notes notes = { notes } error = { error } addNote = { this.addNote } update = { this.update } _delete = { this._delete } />
-            <FollowingCompanies user = { user } followingCompanies = { followingCompanies } companies = { companies } error = { error } addCompany = { this.addCompany } update = { this.update } _delete = { this._delete } />
-            <Vacations vacations = { vacations } error = { error } addVacation = { this.addVacation } update = { this.update } _delete = { this._delete } />
+            <div className='error'> { this.error } </div>
+            <Notes notes = { notes } error = { this.error } addNote = { this.addNote } update = { this.update } _delete = { this._delete } />
+            <FollowingCompanies user = { user } followingCompanies = { followingCompanies } companies = { companies } error = { this.error } addCompany = { this.addCompany } update = { this.update } _delete = { this._delete } />
+            <Vacations vacations = { vacations } error = { this.error } addVacation = { this.addVacation } update = { this.update } _delete = { this._delete } />
           </div>
         )
       }
