@@ -53,9 +53,6 @@
       return user;
     };
     const Notes = ({ notes, error, addNote, update, _delete }) => {
-      if ( notes.length > 5 ) {
-        error = 'user can only have a max of 5 notes';
-      }
       return (
       <div>
         <h1>Notes ({ notes.length })</h1>
@@ -76,9 +73,6 @@
     }
     const FollowingCompanies = ({ companies, followingCompanies, user, error, addCompany, update, _delete }) => {
       let filteredComp = companies.filter( company => followingCompanies.find( followComp => company.id === followComp.companyId))
-      if ( filteredComp.length > 5 ) {
-        error = 'user is already following 5 companies';
-      }
       let index = Math.floor(Math.random() * companies.length)//between 1 and 60
       return (
       <div>
@@ -101,9 +95,6 @@
       )
     }
     const Vacations = ({ vacations, error, addVacation, update,  _delete }) => {
-      if (vacations.length > 3) {
-        error = 'user already has 3 vacations';
-      }
       return (
       <div>
         <h1>Vacations ({vacations.length})</h1>
@@ -135,7 +126,13 @@
           error: ''
         }
       }
-      addNote = async ( id, text, error ) => {
+      addNote = async ( id, text ) => {
+        let error = '';
+        if ( this.state.notes.length === 5 ) {
+          console.log('hi')
+          error = 'user can only have a max of 5 notes';
+          this.setState({ error });
+        } else {
         text = [
           'Lorem ipsum dolor sit amet',
           'consectetur adipiscing elit',
@@ -144,17 +141,31 @@
           'Aenean eleifend iaculis',
           'Maecenas congue erat', 
           'rutrum turpis elementum'
-        ] 
+        ];
         const note = (await axios.post(`${API}/users/${this.state.user.id}/notes`, { text: `${text[Math.round(Math.random())]}` } )).data;
         const notes = [...this.state.notes, note];
         this.setState({ notes });
+        }
       }
+      
       addCompany = async (company) => {
+        let error = '';
+        if ( this.state.followingCompanies.length === 5 ) {
+          console.log('hi')
+          error = 'user is already following 5 companies';
+          this.setState({ error });
+        } else {
         company = (await axios.post(`${API}/users/${this.state.user.id}/followingCompanies`, {rating: 3, companyId: company.id})).data
         const followingCompanies = [...this.state.followingCompanies, company];
         this.setState({ followingCompanies });
+        }
       }
       addVacation = async(id) => {
+        let error = '';
+        if ( this.state.vacations.length === 3 ) {
+          error = 'user already has 3 vacations';
+          this.setState({ error });
+        } else {
         const vacayStart = [
           '08/25/2019',
           '09/10/2019',
@@ -170,6 +181,7 @@
         const vacation = (await axios.post(`${API}/users/${this.state.user.id}/vacations`, { startDate: moment(vacayStart[Math.round(Math.random())]), endDate: moment(vacayEnd[Math.round(Math.random())]) } )).data;
         const vacations = [...this.state.vacations, vacation];
         this.setState({ vacations });
+        }
       }
       update = async (id) => {
         await axios.put(`${API}/users/${user.id}/notes/${notes.id}`, { text: `${text}` } );
@@ -199,8 +211,8 @@
           <div>
             <h1>The Acme Random Life</h1>
             Welcome { user.fullName } to your Random Life!
-            <div className='error'> { this.error } </div>
-            <Notes notes = { notes } error = { this.error } addNote = { this.addNote } update = { this.update } _delete = { this._delete } />
+            <div className='error'> { error } </div>
+            <Notes notes = { notes } error = { error } addNote = { this.addNote } update = { this.update } _delete = { this._delete } />
             <FollowingCompanies user = { user } followingCompanies = { followingCompanies } companies = { companies } error = { this.error } addCompany = { this.addCompany } update = { this.update } _delete = { this._delete } />
             <Vacations vacations = { vacations } error = { this.error } addVacation = { this.addVacation } update = { this.update } _delete = { this._delete } />
           </div>
